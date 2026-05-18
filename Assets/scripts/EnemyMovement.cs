@@ -3,27 +3,49 @@ using UnityEngine;
 public class EnemyMovement : MonoBehaviour
 {
     public float speed = 2f;
-    private Transform target;
 
-    private void Start()
+    private Vector3[] path;
+    private int currentPathIndex = 0;
+
+    public void SetPath(Vector3[] newPath)
     {
-        GameObject cannon = GameObject.FindGameObjectWithTag("Player");
-
-        if (cannon != null)
-            target = cannon.transform;
+        path = newPath;
+        currentPathIndex = 0;
     }
 
     private void Update()
+{
+    if (path == null || path.Length == 0)
+        return;
+
+    Vector3 targetPosition = path[currentPathIndex];
+
+    Vector3 direction = targetPosition - transform.position;
+    direction.y = 0f;
+
+    if (direction.magnitude < 0.15f)
     {
-        if (target == null) return;
+        currentPathIndex++;
 
-        Vector3 direction = target.position - transform.position;
-        direction.y = 0f;
-        direction.Normalize();
+        if (currentPathIndex >= path.Length)
+            return;
 
-        transform.position += direction * speed * Time.deltaTime;
-
-        // On ne tourne plus tout l'objet pour l'instant
-        // Ça évite de casser le texte au-dessus.
+        return;
     }
+
+    direction.Normalize();
+
+    // Déplacement
+    transform.position += direction * speed * Time.deltaTime;
+
+    // Rotation vers la direction du mouvement
+    Quaternion targetRotation =
+    Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180, 0);
+
+    transform.rotation = Quaternion.Slerp(
+        transform.rotation,
+        targetRotation,
+        5f * Time.deltaTime
+    );
+}
 }

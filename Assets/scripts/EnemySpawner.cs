@@ -11,6 +11,20 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnZ = 9f;
     [SerializeField] private float spawnY = -0.10f;
 
+    [Header("Portals")]
+    [SerializeField] private Transform leftPortalEntry;
+    [SerializeField] private Transform leftPortalExit;
+    [SerializeField] private Transform rightPortalEntry;
+    [SerializeField] private Transform rightPortalExit;
+
+    [Header("Target")]
+    [SerializeField] private Transform cannonTarget;
+
+    [Header("Path Randomness")]
+    [SerializeField] private float middlePointXRandom = 3f;
+    [SerializeField] private float middlePointZRandom = 2f;
+    [SerializeField] private float finalTargetRandomRadius = 1.2f;
+
     [Header("Rules")]
     [SerializeField] private int minimumEnemiesOnScreen = 1;
 
@@ -21,6 +35,13 @@ public class EnemySpawner : MonoBehaviour
 
     private void Start()
     {
+        if (cannonTarget == null)
+        {
+            GameObject cannon = GameObject.FindGameObjectWithTag("Player");
+            if (cannon != null)
+                cannonTarget = cannon.transform;
+        }
+
         EnsureMinimumEnemies();
     }
 
@@ -40,9 +61,9 @@ public class EnemySpawner : MonoBehaviour
     private void EnsureMinimumEnemies()
     {
         int currentEnemyCount = FindObjectsByType<EnemyWord>(
-    FindObjectsInactive.Exclude,
-    FindObjectsSortMode.None
-    ).Length;
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        ).Length;
 
         while (currentEnemyCount < minimumEnemiesOnScreen)
         {
@@ -53,6 +74,17 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
+        bool useLeftPortal = Random.value < 0.5f;
+
+        Transform portalEntry = useLeftPortal ? leftPortalEntry : rightPortalEntry;
+        Transform portalExit = useLeftPortal ? leftPortalExit : rightPortalExit;
+
+        if (portalEntry == null || portalExit == null || cannonTarget == null)
+        {
+            Debug.LogError("EnemySpawner: Portal Entry / Exit ou CannonTarget manquant !");
+            return;
+        }
+
         Vector3 spawnPosition = new Vector3(
             Random.Range(minX, maxX),
             spawnY,
@@ -70,5 +102,37 @@ public class EnemySpawner : MonoBehaviour
         }
 
         enemyWord.SetWord(WordDatabase.GetRandomWord());
+
+        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+
+        if (movement == null)
+        {
+            Debug.LogError("Enemy prefab has no EnemyMovement component!");
+            return;
+        }
+
+        Vector3 middlePoint = Vector3.Lerp(portalExit.position, cannonTarget.position, 0.55f);
+
+        middlePoint += new Vector3(
+            Random.Range(-middlePointXRandom, middlePointXRandom),
+            0f,
+            Random.Range(-middlePointZRandom, middlePointZRandom)
+        );
+
+        Vector3 finalTarget = cannonTarget.position + new Vector3(
+            Random.Range(-finalTargetRandomRadius, finalTargetRandomRadius),
+            0f,
+            Random.Range(-finalTargetRandomRadius, finalTargetRandomRadius)
+        );
+
+        Vector3[] path =
+        {
+            portalEntry.position,
+            portalExit.position,
+            middlePoint,
+            finalTarget
+        };
+
+        movement.SetPath(path);
     }
 }
