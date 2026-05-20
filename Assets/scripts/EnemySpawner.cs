@@ -12,10 +12,18 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnY = -0.10f;
 
     [Header("Portals")]
+
     [SerializeField] private Transform leftPortalEntry;
     [SerializeField] private Transform leftPortalExit;
+
+    [SerializeField] private Transform leftPortalEntry1;
+    [SerializeField] private Transform leftPortalExit1;
+
     [SerializeField] private Transform rightPortalEntry;
     [SerializeField] private Transform rightPortalExit;
+
+    [SerializeField] private Transform rightPortalEntry1;
+    [SerializeField] private Transform rightPortalExit1;
 
     [Header("Target")]
     [SerializeField] private Transform cannonTarget;
@@ -38,6 +46,7 @@ public class EnemySpawner : MonoBehaviour
         if (cannonTarget == null)
         {
             GameObject cannon = GameObject.FindGameObjectWithTag("Player");
+
             if (cannon != null)
                 cannonTarget = cannon.transform;
         }
@@ -74,10 +83,26 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        bool useLeftPortal = Random.value < 0.5f;
+        Transform[] portalEntries =
+        {
+            leftPortalEntry,
+            leftPortalEntry1,
+            rightPortalEntry,
+            rightPortalEntry1
+        };
 
-        Transform portalEntry = useLeftPortal ? leftPortalEntry : rightPortalEntry;
-        Transform portalExit = useLeftPortal ? leftPortalExit : rightPortalExit;
+        Transform[] portalExits =
+        {
+            leftPortalExit,
+            leftPortalExit1,
+            rightPortalExit,
+            rightPortalExit1
+        };
+
+        int randomPortalIndex = Random.Range(0, portalEntries.Length);
+
+        Transform portalEntry = portalEntries[randomPortalIndex];
+        Transform portalExit = portalExits[randomPortalIndex];
 
         if (portalEntry == null || portalExit == null || cannonTarget == null)
         {
@@ -111,7 +136,11 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        Vector3 middlePoint = Vector3.Lerp(portalExit.position, cannonTarget.position, 0.55f);
+        Vector3 middlePoint = Vector3.Lerp(
+            portalExit.position,
+            cannonTarget.position,
+            0.55f
+        );
 
         middlePoint += new Vector3(
             Random.Range(-middlePointXRandom, middlePointXRandom),
