@@ -3,18 +3,25 @@ using UnityEngine;
 public class CannonBall : MonoBehaviour
 {
     private Transform target;
+    private Transform hitPoint;
 
-    [SerializeField] private float travelTime = 0.55f;
-    [SerializeField] private float arcHeight = 1.6f;
+    [SerializeField] private float speed = 18f;
+    [SerializeField] private float arcHeight = 1.1f;
 
     private Vector3 startPosition;
-    private float elapsedTime;
+    private float totalDistance;
+    private float traveledDistance;
 
     public void Initialize(Transform targetTransform)
     {
         target = targetTransform;
+        hitPoint = target.Find("HitPoint");
+
         startPosition = transform.position;
-        elapsedTime = 0f;
+        traveledDistance = 0f;
+
+        Vector3 targetPosition = GetTargetPosition();
+        totalDistance = Vector3.Distance(startPosition, targetPosition);
     }
 
     private void Update()
@@ -25,12 +32,12 @@ public class CannonBall : MonoBehaviour
             return;
         }
 
-        elapsedTime += Time.deltaTime;
+        traveledDistance += speed * Time.deltaTime;
 
-        float progress = elapsedTime / travelTime;
+        float progress = traveledDistance / totalDistance;
         progress = Mathf.Clamp01(progress);
 
-        Vector3 targetPosition = target.position;
+        Vector3 targetPosition = GetTargetPosition();
 
         Vector3 currentPosition = Vector3.Lerp(
             startPosition,
@@ -56,5 +63,16 @@ public class CannonBall : MonoBehaviour
 
             Destroy(gameObject);
         }
+    }
+
+    private Vector3 GetTargetPosition()
+    {
+        if (hitPoint != null)
+            return hitPoint.position;
+
+        if (target != null)
+            return target.position;
+
+        return transform.position;
     }
 }
