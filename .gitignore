@@ -72,3 +72,4 @@ InitTestScene*.unity*
 
 # OS
 .DS_Store
+Packages/com.unity.ide.rider/
