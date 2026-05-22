@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
         if (direction == Vector3.zero)
             return;
 
-        Quaternion targetRotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -90f, 0f);
+        Quaternion targetRotation = Quaternion.LookRotation(direction) * Quaternion.Euler(-90f, -90f, 0f);
 
         cannonModel.rotation = Quaternion.Slerp(
             cannonModel.rotation,
