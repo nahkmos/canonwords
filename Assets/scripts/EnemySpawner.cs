@@ -41,6 +41,14 @@ public class EnemySpawner : MonoBehaviour
 
     private float spawnTimer;
 
+    public void SetRules(int minimumEnemies, float spawnInterval)
+    {
+        minimumEnemiesOnScreen = minimumEnemies;
+        additionalSpawnInterval = spawnInterval;
+
+ Debug.Log("EnemySpawner: Rules set - Minimum enemies: " + minimumEnemies + ", Additional spawn interval: " + spawnInterval);
+    }
+
     private void Start()
     {
         if (cannonTarget == null)

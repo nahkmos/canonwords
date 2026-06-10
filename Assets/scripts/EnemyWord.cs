@@ -106,7 +106,10 @@ Quaternion targetRotation = startRotation * Quaternion.Euler(tiltAmount, 0f, 0f)
 
         yield return null;
     }
+    GameManager gameManager = FindFirstObjectByType<GameManager>();
 
+    if (gameManager != null)
+        gameManager.RegisterEnemyDestroyed();
     Destroy(gameObject);
 }
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,11 +16,96 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ParticleSystem smokeRing;
     [SerializeField] private CannonRecoil cannonRecoil;
 
+    [Header("Win Condition")]
+    [SerializeField] private int shipsToDestroyToWin = 20;
+    [SerializeField] private string levelSelectSceneName = "LevelSelect";
+
+    private int destroyedShips = 0;
+    private bool levelFinished = false;
+    private EnemySpawner enemySpawner;    
+
+    private void Start()
+    {
+        enemySpawner = GetComponent<EnemySpawner>();
+
+        int selectedLevel = PlayerPrefs.GetInt("SelectedLevel", 1);
+        ApplyLevelSettings(selectedLevel);
+    }
+
+    private void ApplyLevelSettings(int level)
+    {
+        int minimumEnemies;
+        float spawnInterval;
+
+        switch (level)
+        {
+            case 1:
+                minimumEnemies = level;
+                spawnInterval = 4.5f;
+                shipsToDestroyToWin = level * 10;
+                break;
+
+            case 2:
+                minimumEnemies = level;
+                spawnInterval = 4f;
+                shipsToDestroyToWin = level * 10;
+                break;
+
+            case 3:
+                minimumEnemies = level;
+                spawnInterval = 3.5f;
+                shipsToDestroyToWin = level * 10;
+                break;
+
+            case 4:
+                minimumEnemies = level;
+                spawnInterval = 3f;
+                shipsToDestroyToWin = level * 10;
+                break;
+
+            case 5:
+                minimumEnemies = level;
+                spawnInterval = 2f;
+                shipsToDestroyToWin = level * 10;
+                break;
+
+            default:
+                minimumEnemies = 1;
+                spawnInterval = 5f;
+                shipsToDestroyToWin = 5;
+                break;
+        }
+
+        if (enemySpawner != null)
+            enemySpawner.SetRules(minimumEnemies, spawnInterval);
+    }
 
     private void Update()
     {
+        if (levelFinished)
+            return;
+
         HandleKeyboardInput();
         RotateCannonTowardTarget();
+    }
+
+    public void RegisterEnemyDestroyed()
+    {
+        if (levelFinished)
+            return;
+
+        destroyedShips++;
+
+        Debug.Log($"Ships destroyed: {destroyedShips}/{shipsToDestroyToWin}");
+
+        if (destroyedShips >= shipsToDestroyToWin)
+            WinLevel();
+    }
+
+    private void WinLevel()
+    {
+        levelFinished = true;
+        SceneManager.LoadScene(levelSelectSceneName);
     }
 
     private void HandleKeyboardInput()
@@ -45,9 +131,7 @@ public class GameManager : MonoBehaviour
     private void HandleTypedLetter(char typedChar)
     {
         if (currentTarget == null)
-        {
             currentTarget = FindTargetStartingWith(typedChar);
-        }
 
         if (currentTarget == null)
             return;
@@ -86,8 +170,7 @@ public class GameManager : MonoBehaviour
 
     private void ShootAtEnemy(EnemyWord enemy)
     {
-        GameObject cannonBall =
-            Instantiate(cannonBallPrefab, playerShip.position, Quaternion.identity);
+        GameObject cannonBall = Instantiate(cannonBallPrefab, playerShip.position, Quaternion.identity);
 
         CannonBall cannonBallScript = cannonBall.GetComponent<CannonBall>();
 
@@ -96,6 +179,7 @@ public class GameManager : MonoBehaviour
             Debug.LogError("CannonBall prefab has no CannonBall script!");
             return;
         }
+
         if (muzzleFlash != null)
             muzzleFlash.Play();
 

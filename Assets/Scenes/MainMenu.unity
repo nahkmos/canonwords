@@ -572,9 +572,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83cb3a0d415484be380d3cf2bfc4ec94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonPressAnimation
-  pressedScale: 0.85
+  pressedScale: 0.8
   animationSpeed: 10
-  sceneToLoad: CityAssault
+  sceneToLoad: LevelMenu
 --- !u!1 &1330385853
 GameObject:
   m_ObjectHideFlags: 0

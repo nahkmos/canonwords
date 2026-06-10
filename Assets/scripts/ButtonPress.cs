@@ -9,6 +9,7 @@ public class UIButtonPressAnimation : MonoBehaviour, IPointerDownHandler, IPoint
     [SerializeField] private float animationSpeed = 12f;
 
     [SerializeField] private string sceneToLoad = "GameScene";
+    [SerializeField] private int levelNumber = 1;
 
     private Vector3 originalScale;
     private Coroutine scaleCoroutine;
@@ -63,6 +64,8 @@ public class UIButtonPressAnimation : MonoBehaviour, IPointerDownHandler, IPoint
 
     private IEnumerator LoadSceneAfterAnimation()
     {
+        PlayerPrefs.SetInt("SelectedLevel", levelNumber);
+        PlayerPrefs.Save();
         isLoadingScene = true;
 
         yield return new WaitForSecondsRealtime(0.15f);
